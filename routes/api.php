@@ -2,27 +2,47 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CropController;
-use App\Http\Controllers\MemberController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Validator;
 use Kreait\Firebase\Factory;
-use App\Http\Controllers\FirebaseController;
+
+// Controllers
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnalysisController;
-use App\Http\Controllers\SensorDataController;
-use App\Models\SensorData;
-use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\CropController;
+use App\Http\Controllers\FirebaseController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SensorDataController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
+// Models
+use App\Models\SensorData;
+use App\Models\Crop;
 
-Route::middleware('auth:sanctum')->delete('/conversations/{id}', [ConversationController::class, 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
 
+/*
+|--------------------------------------------------------------------------
+| UTILITY ROUTES
+|--------------------------------------------------------------------------
+*/
 
-Route::middleware('auth:sanctum')->get('/notifications', [NotificationController::class, 'getNotifications']);
-Route::middleware('auth:sanctum')->post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-
+// Clear application cache
 Route::get('/clear-cache', function() {
     Artisan::call('route:clear');
     Artisan::call('cache:clear');
@@ -30,92 +50,226 @@ Route::get('/clear-cache', function() {
     Artisan::call('view:clear');
     return "Cache cleared!";
 });
-//////////////EZZ
-//use App\Http\Controllers\CropController;  // ✅ Make sure this matches the file location
-use App\Http\Controllers\OrderController;
-use App\Models\Crop;
-use App\Http\Controllers\ProductController;
-//////////////////////////////////////
-//orders apis
-Route::middleware('auth:sanctum')->get('/farmers/orders', [OrderController::class, 'getFarmerOrders']);
-Route::middleware('auth:sanctum')->get('/latest-conversations', [MessageController::class, 'latestConversations']);
 
-Route::post('/orders', [OrderController::class, 'store']);
-Route::get('/orders/{id}', [OrderController::class, 'show']);
-Route::put('/orders/{id}', [OrderController::class, 'update']);
-Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATION ROUTES
+|--------------------------------------------------------------------------
+*/
 
- Route::get('/categories/{category_id}/products', [ProductController::class, 'getProductsByCategory']);
- 
-Route::middleware('auth:sanctum') ->post('/products/add-from-crop', [ProductController::class, 'addProductFromCrop']);
-    
-    // عرض جميع المنتجات
-    Route::get('/products', [ProductController::class, 'index']);
-    
-    // عرض تفاصيل منتج معين
-    Route::get('/products/{id}', [ProductController::class, 'show']);
-    
-    //carts apis
-    Route::middleware(['api', \Illuminate\Session\Middleware\StartSession::class])->group(function () {
-        // Add a product to the cart
-        Route::post('/cart/add', [ProductController::class, 'add_to_cart']);
-        
-        // Display the content of the cart
-        Route::get('/cart', [ProductController::class, 'cart']);
-        
-        Route::post('/place-order', [ProductController::class, 'place_an_order'])->middleware('auth:api');    
-        // Update the quantity of a product in the cart
-        Route::put('/cart/update/{id}', [ProductController::class, 'updateCart']);
-    
-        // Remove a product from the cart
-        Route::delete('/cart/remove/{id}', [ProductController::class, 'removeFromCart']);
-    
-        // Clear the entire cart
-        Route::delete('/cart/clear', [ProductController::class, 'clearCart']);
-    });
+// Public authentication routes
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
 
+// Password reset functionality
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
 
-
-    Route::get('/categories', [Productcontroller::class, 'getAllCategories']);
-    Route::get('/users/{userId}/orders', [OrderController::class, 'getUserOrders']);
-
-
-
-//////////////Ezz
-
-Route::get('/order-analytics', [AnalysisController::class, 'getFarmerOrderAnalytics']);
-
-
-
-
+// Protected authentication routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/conversations', [ConversationController::class, 'index']);
-    Route::post('/conversations', [ConversationController::class, 'store']);
+    // Get current authenticated user
+    Route::get('user', [AuthController::class, 'user']);
 
-    Route::post('/messages', [MessageController::class, 'store']);
-    Route::get('/messages/{conversationId}', [MessageController::class, 'getMessages']);
-    Route::post('/messages/read/{messageId}', [MessageController::class, 'markAsRead']);
+    // Update user account information
+    Route::post('/update-account', [AuthController::class, 'updateAccount']);
+
+    // User logout
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+*/
 
-// Sensor Data API
+// Admin dashboard
+Route::get('/admin/dashboard', function () {
+    return response()->json(['message' => 'Welcome Admin!']);
+});
+
+// Member management (Admin functionality)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/add-member', [AdminController::class, 'store']);
+    Route::put('/add-member/{id}', [AdminController::class, 'update']);
+    Route::delete('/add-member/{id}', [AdminController::class, 'destroy']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| PRODUCT & CATEGORY ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Public product routes
+Route::get('/products', [ProductController::class, 'index']); // Get all products
+Route::get('/products/{id}', [ProductController::class, 'show']); // Get specific product details
+Route::get('/categories', [ProductController::class, 'getAllCategories']); // Get all categories
+Route::get('/categories/{category_id}/products', [ProductController::class, 'getProductsByCategory']); // Get products by category
+
+// Protected product routes
+Route::middleware('auth:sanctum')->group(function () {
+    // Add product from existing crop
+    Route::post('/products/add-from-crop', [ProductController::class, 'addProductFromCrop']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| SHOPPING CART ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Cart functionality with session middleware
+Route::middleware(['api', \Illuminate\Session\Middleware\StartSession::class])->group(function () {
+    // Add product to shopping cart
+    Route::post('/cart/add', [ProductController::class, 'add_to_cart']);
+
+    // Display cart contents
+    Route::get('/cart', [ProductController::class, 'cart']);
+
+    // Update product quantity in cart
+    Route::put('/cart/update/{id}', [ProductController::class, 'updateCart']);
+
+    // Remove specific product from cart
+    Route::delete('/cart/remove/{id}', [ProductController::class, 'removeFromCart']);
+
+    // Clear entire shopping cart
+    Route::delete('/cart/clear', [ProductController::class, 'clearCart']);
+
+    // Place order from cart (requires authentication)
+    Route::post('/place-order', [ProductController::class, 'place_an_order'])->middleware('auth:api');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FAVORITES ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Add product to user favorites
+    Route::post('/favorite/{product}', [ProductController::class, 'addFavorite']);
+
+    // Remove product from user favorites
+    Route::delete('/favorite/{product}', [ProductController::class, 'removeFavorite']);
+
+    // Get user's favorite products
+    Route::get('/favorites', [ProductController::class, 'getFavorites']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| ORDER MANAGEMENT ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Public order routes
+Route::post('/orders', [OrderController::class, 'store']); // Create new order
+Route::get('/orders/{id}', [OrderController::class, 'show']); // Get specific order details
+Route::put('/orders/{id}', [OrderController::class, 'update']); // Update order status
+Route::delete('/orders/{id}', [OrderController::class, 'destroy']); // Delete order
+
+// User-specific order routes
+Route::get('/users/{userId}/orders', [OrderController::class, 'getUserOrders']); // Get orders for specific user
+
+// Protected order routes
+Route::middleware('auth:sanctum')->group(function () {
+    // Get current user's orders
+    Route::get('/orders', [OrderController::class, 'index']);
+
+    // Get farmer-specific orders
+    Route::get('/farmers/orders', [OrderController::class, 'getFarmerOrders']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| CROP MANAGEMENT ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Crop CRUD operations
+Route::post('/crops', [CropController::class, 'store']); // Create new crop
+Route::put('/crops/{id}', [CropController::class, 'update']); // Update crop information
+Route::delete('/crops/{id}', [CropController::class, 'destroy']); // Delete crop
+Route::get('/users/{user_id}/crops', [CropController::class, 'getCropsByUserId']); // Get crops by user ID
+
+/*
+|--------------------------------------------------------------------------
+| MEMBER MANAGEMENT ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Get members associated with specific user
+Route::get('/users/{user_id}/members', [MemberController::class, 'getMembersByUserId']);
+
+/*
+|--------------------------------------------------------------------------
+| MESSAGING & COMMUNICATION ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Conversation management
+    Route::get('/conversations', [ConversationController::class, 'index']); // Get all user conversations
+    Route::post('/conversations', [ConversationController::class, 'store']); // Create new conversation
+    Route::delete('/conversations/{id}', [ConversationController::class, 'destroy']); // Delete conversation
+
+    // Message management
+    Route::post('/messages', [MessageController::class, 'store']); // Send new message
+    Route::get('/messages/{conversationId}', [MessageController::class, 'getMessages']); // Get messages in conversation
+    Route::post('/messages/read/{messageId}', [MessageController::class, 'markAsRead']); // Mark message as read
+    Route::get('/latest-conversations', [MessageController::class, 'latestConversations']); // Get latest conversations
+});
+
+/*
+|--------------------------------------------------------------------------
+| NOTIFICATION ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Get user notifications
+    Route::get('/notifications', [NotificationController::class, 'getNotifications']);
+
+    // Mark specific notification as read
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| ANALYTICS & REPORTING ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Get order analytics for farmers
+Route::get('/order-analytics', [AnalysisController::class, 'getFarmerOrderAnalytics']);
+
+/*
+|--------------------------------------------------------------------------
+| SENSOR DATA & FIREBASE ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Export sensor data
 Route::get('/export-sensors', [SensorDataController::class, 'export']);
+
+// Store latest Firebase sensor data to MySQL
 Route::post('/firebase/store', function (Request $request) {
     try {
-        // إنشاء اتصال بفايربيز
+        // Initialize Firebase connection
         $firebase = (new Factory)
             ->withServiceAccount(config('services.firebase.credentials_file'))
             ->withDatabaseUri('https://agrovision-sensor-data-default-rtdb.firebaseio.com/');
 
         $database = $firebase->createDatabase();
 
-        // جلب آخر البيانات من Firebase
+        // Fetch latest sensor data from Firebase
         $data = $database->getReference('sensor_data')
                          ->orderByKey()
                          ->limitToLast(1)
                          ->getValue();
 
-        // التحقق مما إذا كانت البيانات فارغة
+        // Check if data exists in Firebase
         if (!$data) {
             return response()->json([
                 'success' => false,
@@ -123,10 +277,10 @@ Route::post('/firebase/store', function (Request $request) {
             ], 404);
         }
 
-        // استخراج آخر عنصر من البيانات
+        // Extract the latest record
         $latestRecord = array_values($data)[0];
 
-        // التحقق من صحة البيانات قبل الإدخال في MySQL
+        // Validate sensor data before MySQL insertion
         $validator = Validator::make($latestRecord, [
             'EC' => 'required|numeric',
             'Fertility' => 'required|numeric',
@@ -147,9 +301,9 @@ Route::post('/firebase/store', function (Request $request) {
             ], 422);
         }
 
-        // تخزين البيانات في MySQL
+        // Store validated data in MySQL
         SensorData::create([
-            'sensor_id' => 'agro_0001', // المعرف ثابت
+            'sensor_id' => 'agro_0001', // Fixed sensor identifier
             'ec' => $latestRecord['EC'],
             'fertility' => $latestRecord['Fertility'],
             'hum' => $latestRecord['Hum'],
@@ -175,16 +329,17 @@ Route::post('/firebase/store', function (Request $request) {
     }
 });
 
+// Retrieve all sensor data from Firebase
 Route::get('/firebase/retrieve', function () {
     try {
-        // تهيئة Firebase
+        // Initialize Firebase connection
         $firebase = (new Factory)
             ->withServiceAccount(config('services.firebase.credentials_file'))
             ->withDatabaseUri('https://agrovision-sensor-data-default-rtdb.firebaseio.com/');
 
         $database = $firebase->createDatabase();
 
-        // استدعاء البيانات من المسار المحدد
+        // Retrieve all sensor data from Firebase
         $data = $database->getReference('sensor_data')->getValue();
 
         return response()->json([
@@ -200,6 +355,8 @@ Route::get('/firebase/retrieve', function () {
         ]);
     }
 });
+
+// Get the most recent sensor record from Firebase
 Route::get('/firebase/last-record', function () {
     try {
         $firebase = (new Factory)
@@ -208,13 +365,13 @@ Route::get('/firebase/last-record', function () {
 
         $database = $firebase->createDatabase();
 
-        // جلب آخر إدخال
+        // Fetch the latest sensor entry
         $data = $database->getReference('sensor_data')
                          ->orderByKey()
                          ->limitToLast(1)
                          ->getValue();
 
-        // تحويل النتيجة إلى أول عنصر
+        // Convert result to first element or null
         $lastRecord = $data ? array_values($data)[0] : null;
 
         return response()->json([
@@ -230,59 +387,3 @@ Route::get('/firebase/last-record', function () {
         ]);
     }
 });
-
-
-// Member & Crops Data API
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/add-member', [AdminController::class, 'store']);
-    Route::put('/add-member/{id}', [AdminController::class, 'update']);
-    Route::delete('/add-member/{id}', [AdminController::class, 'destroy']);
-});
-Route::get('/users/{user_id}/members', [MemberController::class, 'getMembersByUserId']);
-
-
-
-// Order Data API
-Route::middleware('auth:sanctum')->group(function () {
-    // استرجاع الطلبات الخاصة بالمستخدم الحالي
-    Route::get('/orders', [OrderController::class, 'index']);
-    // إنشاء طلب جديد
-    Route::post('/orders', [OrderController::class, 'store']);
-    // تعديل حالة الطلب
-    Route::put('/orders/{id}', [OrderController::class, 'update']);
-    Route::get('/users/{userId}/orders', [OrderController::class, 'getUserOrders']);
-
-});
-
-
-// Auth Data API
-Route::post('register', [AuthController::class, 'register']);  // Route for registering a user
-Route::post('login', [AuthController::class, 'login']);  // Route for logging in
-Route::middleware('auth:sanctum')->post('/update-account', [AuthController::class, 'updateAccount']);
-// Logout
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-
-
-
-// Crops Data API
-Route::post('/crops', [CropController::class, 'store']);
-Route::put('/crops/{id}', [CropController::class, 'update']);
-Route::delete('/crops/{id}', [CropController::class, 'destroy']);
-Route::get('/users/{user_id}/crops', [CropController::class, 'getCropsByUserId']);
-
-
-Route::middleware('auth:sanctum')->get('user', [AuthController::class, 'user']);
-    Route::get('/admin/dashboard', function () {
-        return response()->json(['message' => 'Welcome Admin!']);
-    });
-    
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-    Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
-    
-    //favorites apis 
-      Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/favorite/{product}', [productController::class, 'addFavorite']);
-        Route::delete('/favorite/{product}', [productController::class, 'removeFavorite']);
-        Route::get('/favorites', [productController::class, 'getFavorites']);
-    });
-
