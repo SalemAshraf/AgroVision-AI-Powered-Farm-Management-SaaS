@@ -1,0 +1,24 @@
+[06-Dec-2024 22:45:19 UTC] PHP Warning:  require(/home/agrovision/api.agrovision.ltd/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/agrovision/api.agrovision.ltd/public/index.php on line 15
+[06-Dec-2024 22:45:19 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/agrovision/api.agrovision.ltd/public/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/agrovision/api.agrovision.ltd/public/index.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/agrovision/api.agrovision.ltd/public/index.php on line 15
+[01-May-2025 17:03:01 UTC] PHP Fatal error:  Cannot use App\Models\OrderItem as OrderItem because the name is already in use in /home/agrovision/final.agrovision.ltd/app/Http/Controllers/ProductController.php on line 14
+[05-May-2025 10:47:30 UTC] PHP Fatal error:  Cannot use App\Http\Controllers\AnalysisController as AnalysisController because the name is already in use in /home/agrovision/final.agrovision.ltd/routes/api.php on line 68
+[05-May-2025 10:55:54 UTC] PHP Fatal error:  Cannot use App\Http\Controllers\AnalysisController as AnalysisController because the name is already in use in /home/agrovision/final.agrovision.ltd/routes/api.php on line 68
+[05-May-2025 11:21:44 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function opcache_reset() in /home/agrovision/final.agrovision.ltd/public/index.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/agrovision/final.agrovision.ltd/public/index.php on line 4
+[05-May-2025 11:21:52 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function opcache_reset() in /home/agrovision/final.agrovision.ltd/public/index.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/agrovision/final.agrovision.ltd/public/index.php on line 4
+[05-May-2025 11:21:55 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function opcache_reset() in /home/agrovision/final.agrovision.ltd/public/index.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/agrovision/final.agrovision.ltd/public/index.php on line 4
+[05-May-2025 11:22:00 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function opcache_reset() in /home/agrovision/final.agrovision.ltd/public/index.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/agrovision/final.agrovision.ltd/public/index.php on line 4
