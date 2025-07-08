@@ -80,11 +80,13 @@ AgroVision/
 ## 📸 Screenshots
 
 <img width="2625" alt="Untitled (3500 x 3500 px) (2)" src="https://github.com/user-attachments/assets/c14295b3-99fb-4c52-a2a1-848001926b98" />
+<img width="2625" alt="Untitled (3500 x 3500 px) (3)" src="https://github.com/user-attachments/assets/a4ec5e26-b6ad-4586-9c06-5f6b823a5b07" />
+<img width="2625" alt="Untitled (3500 x 3500 px) (4)" src="https://github.com/user-attachments/assets/7c604c08-e459-4fa5-91c2-914c0c0e75d0" />
 
 
 
 ## 👨‍💻 Author
 
 **Salem Ashraf**  
-[LinkedIn](https://linkedin.com/in/salem-ashraf) 
+[LinkedIn]([https://linkedin.com/in/salem-ashraf](https://www.linkedin.com/in/salem-ashraf-khudair-9a39a1219/)) 
 
