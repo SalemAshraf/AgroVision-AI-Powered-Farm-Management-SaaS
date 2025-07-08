@@ -79,10 +79,10 @@ AgroVision/
 
 ## 📸 Screenshots
 
-<img width="2625" alt="Untitled (3500 x 3500 px) (2)" src="https://github.com/user-attachments/assets/c14295b3-99fb-4c52-a2a1-848001926b98" />
-<img width="2625" alt="Untitled (3500 x 3500 px) (3)" src="https://github.com/user-attachments/assets/a4ec5e26-b6ad-4586-9c06-5f6b823a5b07" />
-<img width="2625" alt="Untitled (3500 x 3500 px) (4)" src="https://github.com/user-attachments/assets/7c604c08-e459-4fa5-91c2-914c0c0e75d0" />
-
+![Untitled (3500 x 3500 px) (3)](https://github.com/user-attachments/assets/dc5c4975-8126-4b7e-9a32-d3fafeadacd5)
+![Untitled (3500 x 3500 px) (2)](https://github.com/user-attachments/assets/3d562d7f-7457-4b97-9f92-44196a97c036)
+![Untitled (3500 x 3500 px) (4)](https://github.com/user-attachments/assets/b2889b7a-9228-4edf-9df8-2c68da159376)
+![Untitled (3500 x 3500 px) (1)](https://github.com/user-attachments/assets/a521f0d0-5612-4c5d-9330-02eed85a7dde)
 
 
 ## 👨‍💻 Author
